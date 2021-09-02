@@ -18,7 +18,7 @@ def parse_site(url):
     soup = BeautifulSoup(page.content, "html.parser")
     return soup
 
-# finds the urls from the homepage for the image sub-pages and saves it to two variables; galleryOne and galleryTwo since there are always just two gallery pages.
+# finds the urls from the homepage for the image sub-pages and saves it to a list of subpages
 
 
 def get_imageUrl():
@@ -26,10 +26,8 @@ def get_imageUrl():
     url = "http://www.skogbergsantik.com"
     soup = parse_site(url)
     for x in soup.find_all('a'):
-        #print (x.get('href'))
         if "gallery_" in str(x):
-            gallery.append(x['href'])
-        
+            gallery.append(x['href'])   
     gallery = list(dict.fromkeys(gallery))
     return gallery
 
@@ -40,7 +38,7 @@ def get_imageUrl():
 def get_images():
     global img_list
     img_list = []
-    
+    #loops through the url list to get the imagelinks from the sites available e.g /gallery_520.html, /gallery_519.html
     for url in get_imageUrl():
         site_url = "http://www.skogbergsantik.com" + url
         soup = parse_site(site_url)
@@ -65,9 +63,8 @@ def publish_photos():
     column_number = 1
     all_labels = []
 
-    # This doesnt work... should create 4 threads and then iterate the create_label function
-    # over the list of urls and add it to the all_labels array to post to the image_frame
-    pool = ThreadPool(11)
+    #creating multiple threads to download all the images and saves it to the array images
+    pool = ThreadPool(22)
     
     print("starting threading")
     images = pool.map(download_images, img_list)
@@ -85,14 +82,15 @@ def download_images(url):
     
 
 
-# takes an image url from img_list then parses that via a PIL object to a label and returns the label
+# takes a Pil Image from images-array, then converts it to a photoimage and puts in on a label to present to the GUI
 def create_labels():
     global images
     global image_frame
     global row_number
     global column_number
     for image in images:
-        
+        print("")
+        print("Drawing image : " + str(images.index(image)+1), end="\r")
         current_image = ImageTk.PhotoImage(image)
 
         label = tk.Label(image_frame, image=current_image)
@@ -101,8 +99,6 @@ def create_labels():
         
         # every 5th image we will increase the row and reset the column number to post 5 images on each row
         if((images.index(image)) % 5 == 0):
-            
-            
             column_number = 0
             row_number += 1
         column_number += 1
@@ -136,7 +132,7 @@ def run_script():
     # add scrollbar
     main_scrollbar = ttk.Scrollbar(
     main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
-    main_scrollbar.pack(side=tk.RIGHT, fill=Y)
+    main_scrollbar.pack(side=tk.RIGHT,fill=Y)
 
     # Configure canvas
     main_canvas.configure(yscrollcommand=main_scrollbar)
