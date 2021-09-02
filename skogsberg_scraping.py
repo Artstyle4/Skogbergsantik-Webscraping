@@ -1,9 +1,11 @@
+from tkinter.constants import Y
 import requests, os
 from bs4 import BeautifulSoup
 import tkinter as tk
 from PIL import Image, ImageTk
 import urllib
 from io import BytesIO
+from tkinter import ttk
 
 
 #url som används för scrapingen
@@ -44,8 +46,8 @@ def select_photos():
     column_number = 0
     
     for image in img_list:
+       print("Working on item number: " + str(img_list.index(image)+1)+ "/" +str(len(img_list)),end="\r")
        
-       print("working on item number: " + str(img_list.index(image)+1)+ "/" +str(len(img_list)))
 
        URL = image
        u = urllib.request.urlopen(URL)
@@ -55,7 +57,7 @@ def select_photos():
        resized_image = im.resize((250,250), Image.ANTIALIAS)
 
        photo = ImageTk.PhotoImage(resized_image)
-       label = tk.Label(image=photo)
+       label = tk.Label(image_frame,image=photo)
        label.image = photo
        label.grid(row=row_number, column=column_number)
        column_number+=1
@@ -63,16 +65,42 @@ def select_photos():
            all_labels.append(label)
            row_number += 1
            column_number = 0
-           print(row_number)
+           
            
 
 
 
 #saves all images into img_list
 get_images()
+
+
 img_list = img_list[:50]
 all_labels = []
+
+
+
 root = tk.Tk()
+root.title('Skogbergs Antik Pictionary ')
+root.geometry("1280x1024")
+#create a main frame
+main_frame = tk.Frame(root)
+main_frame.pack(fill=tk.BOTH, expand=1)
+
+#create a canvas
+my_canvas = tk.Canvas(main_frame)
+my_canvas.pack(side=tk.LEFT,fill=tk.BOTH,expand=1)
+
+#add scrollbar
+my_scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=my_canvas.yview)
+my_scrollbar.pack(side=tk.RIGHT,fill=Y)
+
+#Configure canvas
+my_canvas.configure(yscrollcommand=my_scrollbar)
+my_canvas.bind('<Configure>', lambda e: my_canvas.configure(scrollregion = my_canvas.bbox('all')))
+image_frame = tk.Frame(my_canvas)
+my_canvas.create_window((0,0),window=image_frame, anchor="nw")
+
+
 select_photos()
 
 
