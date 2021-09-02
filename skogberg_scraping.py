@@ -8,6 +8,7 @@ import urllib
 from io import BytesIO
 from tkinter import ttk
 import time
+from multiprocessing.dummy import Pool as ThreadPool
 
 
 # url som används för scrapingen
@@ -47,32 +48,29 @@ def select_photos():
     global all_labels
 
     # for image in img_list:
-    # results.append(my_function(image))
+    # results.append(basic_function(image), img_list)
 
-    #pool = ThreadPool(4)
-    #all_labels = pool.map(basic function, img_list)
+    pool = ThreadPool(4)
+    all_labels = pool.map(create_labels, img_list)
 
-    for image in img_list:
-
-        print("Working on item number: " + str(img_list.index(image)+1) +
-              "/" + str(len(img_list)), end="\r")
-
-        if((img_list.index(image)) % 5 == 0):
-            
-            row_number += 1
-            column_number = 0
-        column_number += 1
-        all_labels.append(basic_function(image))
+    #for image in img_list:
+    #    print(column_number)
+    #    print("Working on item number: " + str(img_list.index(image)+1) +
+    #          "/" + str(len(img_list)), end="\r")
+#
+    #    
+    #    all_labels.append(basic_function(image))
     end = time.time()
     print("")
-    print("this took " + str(round(end - start,2)) +"s")
+    print("This took " + str(round(end - start,2)) +"s")
         
 
 
-def basic_function(image):
+def create_labels(image):
     global image_frame
     global row_number
     global column_number
+    print("Working on item number: " + str(img_list.index(image)+1) + "/" + str(len(img_list)), end="\r")
     URL = image
     u = urllib.request.urlopen(URL)
     raw_data = u.read()
@@ -83,6 +81,11 @@ def basic_function(image):
     label = tk.Label(image_frame, image=photo)
     label.image = photo
     label.grid(row=row_number, column=column_number)
+    if((img_list.index(image)) % 5 == 0):
+          
+        row_number += 1
+        column_number = 0
+    column_number += 1
     return label
 
 
