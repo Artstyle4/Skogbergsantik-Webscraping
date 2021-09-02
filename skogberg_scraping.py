@@ -64,7 +64,7 @@ def publish_photos():
     all_labels = []
 
     #creating multiple threads to download all the images and saves it to the array images
-    pool = ThreadPool(22)
+    pool = ThreadPool(8)
     
     print("starting threading")
     images = pool.map(download_images, img_list)
@@ -88,11 +88,22 @@ def create_labels():
     global image_frame
     global row_number
     global column_number
+    start = time.time()
+    
+
+    iterate_images()
+    end = time.time()
+    print("")
+    print("This took " + str(round(end - start, 2)) + "s")   
+
+# Gui stuff to create a canvas for the images.
+def iterate_images():
+    global row_number
+    global column_number
     for image in images:
         print("")
         print("Drawing image : " + str(images.index(image)+1), end="\r")
         current_image = ImageTk.PhotoImage(image)
-
         label = tk.Label(image_frame, image=current_image)
         label.image = current_image
         label.grid(row=row_number, column=column_number)
@@ -102,10 +113,6 @@ def create_labels():
             column_number = 0
             row_number += 1
         column_number += 1
-        
-
-# Gui stuff to create a canvas for the images.
-
 
 def run_script():
     start = time.time()
@@ -133,6 +140,7 @@ def run_script():
     main_scrollbar = ttk.Scrollbar(
     main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
     main_scrollbar.pack(side=tk.RIGHT,fill=Y)
+   
 
     # Configure canvas
     main_canvas.configure(yscrollcommand=main_scrollbar)
