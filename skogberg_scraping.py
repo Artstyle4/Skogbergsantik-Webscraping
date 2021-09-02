@@ -71,7 +71,6 @@ def select_photos():
 
 # saves all images into img_list
 get_images()
-img_list = img_list
 all_labels = []
 
 
