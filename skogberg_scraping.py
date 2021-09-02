@@ -1,3 +1,4 @@
+# imports
 from tkinter.constants import Y
 import requests
 import os
@@ -11,19 +12,15 @@ import time
 from multiprocessing.dummy import Pool as ThreadPool
 
 
-# url som används för scrapingen
-
-# hitta platsen som scriptet körs ifrån
-dir_path = os.path.dirname(os.path.realpath(__file__))
-img_list = []
-
-
-# hämtar ett Beautiful-Soupobjekt från urlen
+# Create a beautiful soup object from the url www.skogbergantik.com
 def parse_site(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
     return soup
-# skriver om htmlkoden till text och skriver till .csvfilen
+
+# finds the urls from the homepage for the image sub-pages and saves it to two variables; galleryOne and galleryTwo since there are always just two gallery pages.
+
+
 def get_imageUrl():
     url = "http://www.skogbergsantik.com"
     soup = parse_site(url)
@@ -31,7 +28,13 @@ def get_imageUrl():
     galleryTwo = soup.find('a', {'title': 'Bildgalleri 2'})['href']
 
     return [galleryOne, galleryTwo]
+    # finds all image urls from the soup object and appends this to the img_list
+
+
 def get_images():
+    global img_list
+    img_list = []
+
     url = "http://www.skogbergsantik.com" + get_imageUrl()[1]
     soup = parse_site(url)
     images = soup.find_all('img')
@@ -40,37 +43,34 @@ def get_images():
             trimmed_image = image['src'].replace('/120x120', '')
             img_list.append("http://skogbergsantik.com/" + trimmed_image)
 
+# function to post all images to the GUI
 
-def select_photos():
+
+def view_photos():
     start = time.time()
     global row_number
     global column_number
     global all_labels
+    all_labels = []
 
-    # for image in img_list:
-    # results.append(basic_function(image), img_list)
-
+    # This doesnt work... should create 3 threads and then iterate the create_label function
+    # over the list of urls and add it to the all_labels array to post to the image_frame
     pool = ThreadPool(4)
     all_labels = pool.map(create_labels, img_list)
 
-    #for image in img_list:
-    #    print(column_number)
-    #    print("Working on item number: " + str(img_list.index(image)+1) +
-    #          "/" + str(len(img_list)), end="\r")
-#
-    #    
-    #    all_labels.append(basic_function(image))
     end = time.time()
     print("")
-    print("This took " + str(round(end - start,2)) +"s")
-        
+    print("This took " + str(round(end - start, 2)) + "s")
 
 
+# takes an image url from img_list then parses that via PIL to a label and returns the label
 def create_labels(image):
+    global img_list
     global image_frame
     global row_number
     global column_number
-    print("Working on item number: " + str(img_list.index(image)+1) + "/" + str(len(img_list)), end="\r")
+    print("Working on item number: " + str(img_list.index(image)+1) +
+          "/" + str(len(img_list)), end="\r")
     URL = image
     u = urllib.request.urlopen(URL)
     raw_data = u.read()
@@ -81,18 +81,24 @@ def create_labels(image):
     label = tk.Label(image_frame, image=photo)
     label.image = photo
     label.grid(row=row_number, column=column_number)
+    # every 5th image we will increase the row and reset the column number to post 5 images on each row
     if((img_list.index(image)) % 5 == 0):
-          
         row_number += 1
         column_number = 0
+
     column_number += 1
     return label
 
+# Gui stuff to create a canvas for the images.
 
-def GUI():
+
+def run_script():
     global image_frame
     global column_number
     global row_number
+    get_images()
+    row_number = 1
+    column_number = 1
 
     root = tk.Tk()
     root.title('Skogbergs Antik Pictionary ')
@@ -118,15 +124,10 @@ def GUI():
     image_frame = tk.Frame(my_canvas)
     my_canvas.create_window((0, 0), window=image_frame, anchor="nw")
 
-    select_photos()
+    view_photos()
 
     root.mainloop()
 
-# saves all images into img_list
 
 
-get_images()
-all_labels = []
-row_number = 1
-column_number = 1
-GUI()
+run_script()
