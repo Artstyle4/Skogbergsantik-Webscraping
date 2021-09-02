@@ -74,7 +74,7 @@ def select_photos():
 get_images()
 
 
-img_list = img_list[:50]
+
 all_labels = []
 
 
