@@ -46,7 +46,7 @@ def get_images():
 # function to post all images to the GUI
 
 
-def view_photos():
+def publish_photos():
     start = time.time()
     global row_number
     global column_number
@@ -96,10 +96,11 @@ def run_script():
     global image_frame
     global column_number
     global row_number
+    #fills the img_list with imgurls via get_images() and set basic variables
     get_images()
     row_number = 1
     column_number = 1
-
+    #creates a gui to present the pictures to
     root = tk.Tk()
     root.title('Skogbergs Antik Pictionary ')
     root.geometry("1280x1024")
@@ -108,23 +109,23 @@ def run_script():
     main_frame.pack(fill=tk.BOTH, expand=1)
 
     # create a canvas
-    my_canvas = tk.Canvas(main_frame)
-    my_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
+    main_canvas = tk.Canvas(main_frame)
+    main_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
 
     # add scrollbar
-    my_scrollbar = ttk.Scrollbar(
-        main_frame, orient=tk.VERTICAL, command=my_canvas.yview)
-    my_scrollbar.pack(side=tk.RIGHT, fill=Y)
+    main_scrollbar = ttk.Scrollbar(
+        main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
+    main_scrollbar.pack(side=tk.RIGHT, fill=Y)
 
     # Configure canvas
-    my_canvas.configure(yscrollcommand=my_scrollbar)
-    my_canvas.bind('<Configure>', lambda e: my_canvas.configure(
-        scrollregion=my_canvas.bbox('all')))
+    main_canvas.configure(yscrollcommand=main_scrollbar)
+    main_canvas.bind('<Configure>', lambda e: main_canvas.configure(
+        scrollregion=main_canvas.bbox('all')))
 
-    image_frame = tk.Frame(my_canvas)
-    my_canvas.create_window((0, 0), window=image_frame, anchor="nw")
+    image_frame = tk.Frame(main_canvas)
+    main_canvas.create_window((0, 0), window=image_frame, anchor="nw")
 
-    view_photos()
+    publish_photos()
 
     root.mainloop()
 
