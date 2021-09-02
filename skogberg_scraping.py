@@ -71,7 +71,7 @@ def select_photos():
 
 # saves all images into img_list
 get_images()
-
+img_list = img_list
 all_labels = []
 
 
@@ -91,10 +91,13 @@ my_scrollbar = ttk.Scrollbar(
     main_frame, orient=tk.VERTICAL, command=my_canvas.yview)
 my_scrollbar.pack(side=tk.RIGHT, fill=Y)
 
+
 # Configure canvas
 my_canvas.configure(yscrollcommand=my_scrollbar)
 my_canvas.bind('<Configure>', lambda e: my_canvas.configure(
     scrollregion=my_canvas.bbox('all')))
+
+
 image_frame = tk.Frame(my_canvas)
 my_canvas.create_window((0, 0), window=image_frame, anchor="nw")
 
