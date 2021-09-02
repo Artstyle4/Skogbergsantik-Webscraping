@@ -42,7 +42,7 @@ def get_images():
             trimmed_image = image['src'].replace('/120x120', '')
             img_list.append("http://skogbergsantik.com/" + trimmed_image)
 
-
+print("test")
 def select_photos():
     row_number = 1
     column_number = 0
