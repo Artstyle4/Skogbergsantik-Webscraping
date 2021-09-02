@@ -22,84 +22,105 @@ def parse_site(url):
 
 
 def get_imageUrl():
+    gallery = []
     url = "http://www.skogbergsantik.com"
     soup = parse_site(url)
-    galleryOne = soup.find('a', {'title': 'Bildgalleri 1'})['href']
-    galleryTwo = soup.find('a', {'title': 'Bildgalleri 2'})['href']
+    for x in soup.find_all('a'):
+        #print (x.get('href'))
+        if "gallery_" in str(x):
+            gallery.append(x['href'])
+        
+    gallery = list(dict.fromkeys(gallery))
+    return gallery
 
-    return [galleryOne, galleryTwo]
+    
     # finds all image urls from the soup object and appends this to the img_list
 
 
 def get_images():
     global img_list
     img_list = []
-
-    url = "http://www.skogbergsantik.com" + get_imageUrl()[1]
-    soup = parse_site(url)
-    images = soup.find_all('img')
-    for image in images:
-        if "files/120x120" in image['src']:
-            trimmed_image = image['src'].replace('/120x120', '')
-            img_list.append("http://skogbergsantik.com/" + trimmed_image)
+    
+    for url in get_imageUrl():
+        site_url = "http://www.skogbergsantik.com" + url
+        soup = parse_site(site_url)
+        images = soup.find_all('img')
+        for image in images:
+            if "files/120x120" in image['src']:
+                trimmed_image = image['src'].replace('/120x120', '')
+                img_list.append("http://skogbergsantik.com/" + trimmed_image)
+    
+    
 
 # function to post all images to the GUI
 
 
 def publish_photos():
-    start = time.time()
+    
     global row_number
     global column_number
     global all_labels
+    global images
+    row_number = 2
+    column_number = 1
     all_labels = []
 
-    # This doesnt work... should create 3 threads and then iterate the create_label function
+    # This doesnt work... should create 4 threads and then iterate the create_label function
     # over the list of urls and add it to the all_labels array to post to the image_frame
-    pool = ThreadPool(4)
-    all_labels = pool.map(create_labels, img_list)
+    pool = ThreadPool(11)
+    
+    print("starting threading")
+    images = pool.map(download_images, img_list)
+    create_labels()
 
-    end = time.time()
-    print("")
-    print("This took " + str(round(end - start, 2)) + "s")
-
-
-# takes an image url from img_list then parses that via PIL to a label and returns the label
-def create_labels(image):
-    global img_list
-    global image_frame
-    global row_number
-    global column_number
-    print("Working on item number: " + str(img_list.index(image)+1) +
-          "/" + str(len(img_list)), end="\r")
-    URL = image
-    u = urllib.request.urlopen(URL)
+def download_images(url):
+    print("Working on item number: " + str(img_list.index(url)+1) +
+              "/" + str(len(img_list)), end="\r")
+    u = urllib.request.urlopen(url)
     raw_data = u.read()
     u.close()
     im = Image.open(BytesIO(raw_data))
     resized_image = im.resize((250, 250), Image.ANTIALIAS)
-    photo = ImageTk.PhotoImage(resized_image)
-    label = tk.Label(image_frame, image=photo)
-    label.image = photo
-    label.grid(row=row_number, column=column_number)
-    # every 5th image we will increase the row and reset the column number to post 5 images on each row
-    if((img_list.index(image)) % 5 == 0):
-        row_number += 1
-        column_number = 0
+    return resized_image
+    
 
-    column_number += 1
-    return label
+
+# takes an image url from img_list then parses that via a PIL object to a label and returns the label
+def create_labels():
+    global images
+    global image_frame
+    global row_number
+    global column_number
+    for image in images:
+        
+        current_image = ImageTk.PhotoImage(image)
+
+        label = tk.Label(image_frame, image=current_image)
+        label.image = current_image
+        label.grid(row=row_number, column=column_number)
+        
+        # every 5th image we will increase the row and reset the column number to post 5 images on each row
+        if((images.index(image)) % 5 == 0):
+            
+            
+            column_number = 0
+            row_number += 1
+        column_number += 1
+        
 
 # Gui stuff to create a canvas for the images.
 
 
 def run_script():
+    start = time.time()
     global image_frame
     global column_number
     global row_number
+    
     #fills the img_list with imgurls via get_images() and set basic variables
     get_images()
-    row_number = 1
-    column_number = 1
+    
+
     #creates a gui to present the pictures to
     root = tk.Tk()
     root.title('Skogbergs Antik Pictionary ')
@@ -114,7 +135,7 @@ def run_script():
 
     # add scrollbar
     main_scrollbar = ttk.Scrollbar(
-        main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
+    main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
     main_scrollbar.pack(side=tk.RIGHT, fill=Y)
 
     # Configure canvas
@@ -123,12 +144,13 @@ def run_script():
         scrollregion=main_canvas.bbox('all')))
 
     image_frame = tk.Frame(main_canvas)
-    main_canvas.create_window((0, 0), window=image_frame, anchor="nw")
-
+    main_canvas.create_window((1, 1), window=image_frame, anchor="nw")
     publish_photos()
 
+    end = time.time()
+    print("")
+    print("This took " + str(round(end - start, 2)) + "s")
+    
     root.mainloop()
-
-
 
 run_script()
