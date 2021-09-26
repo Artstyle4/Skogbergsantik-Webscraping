@@ -10,7 +10,7 @@ from io import BytesIO
 from tkinter import ttk
 import time
 from multiprocessing.dummy import Pool as ThreadPool
-
+import sys
 
 # Create a beautiful soup object from the url www.skogbergantik.com
 def parse_site(url):
@@ -59,8 +59,8 @@ def publish_photos():
     global column_number
     global all_labels
     global images
-    row_number = 2
-    column_number = 1
+    row_number = 0
+    column_number = 0
     all_labels = []
 
     #creating multiple threads to download all the images and saves it to the array images
@@ -68,6 +68,7 @@ def publish_photos():
     
     print("starting threading")
     images = pool.map(download_images, img_list)
+    print(str(sys.getsizeof(images)))
     create_labels()
 
 def download_images(url):
@@ -77,7 +78,7 @@ def download_images(url):
     raw_data = u.read()
     u.close()
     im = Image.open(BytesIO(raw_data))
-    resized_image = im.resize((250, 250), Image.ANTIALIAS)
+    resized_image = im.resize((125, 125), Image.ANTIALIAS)
     return resized_image
     
 
@@ -101,17 +102,17 @@ def iterate_images():
     global row_number
     global column_number
     for image in images:
-        print("")
-        print("Drawing image : " + str(images.index(image)+1), end="\r")
         current_image = ImageTk.PhotoImage(image)
         label = tk.Label(image_frame, image=current_image)
         label.image = current_image
         label.grid(row=row_number, column=column_number)
         
         # every 5th image we will increase the row and reset the column number to post 5 images on each row
-        if((images.index(image)) % 5 == 0):
+        if((images.index(image)) % 10 == 0):
             column_number = 0
             row_number += 1
+            print("")
+            print("Drawing image : " + str(images.index(image)+1), end="\r")
         column_number += 1
 
 def run_script():
