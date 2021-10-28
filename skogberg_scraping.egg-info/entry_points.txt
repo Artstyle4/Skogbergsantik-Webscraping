@@ -1,3 +1,0 @@
-[console_scripts]
-skogberg_scraping = skogberg_scraping:run
-

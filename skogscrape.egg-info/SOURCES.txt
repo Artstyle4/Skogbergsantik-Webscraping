@@ -1,6 +1,0 @@
-setup.py
-skogscrape.egg-info/PKG-INFO
-skogscrape.egg-info/SOURCES.txt
-skogscrape.egg-info/dependency_links.txt
-skogscrape.egg-info/entry_points.txt
-skogscrape.egg-info/top_level.txt
