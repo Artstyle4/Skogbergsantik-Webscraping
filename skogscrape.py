@@ -13,6 +13,8 @@ from multiprocessing.dummy import Pool as ThreadPool
 import sys
 
 # Create a beautiful soup object from the url www.skogbergantik.com
+
+
 def parse_site(url):
     page = requests.get(url)
     soup = BeautifulSoup(page.content, "html.parser")
@@ -27,18 +29,17 @@ def get_imageUrl():
     soup = parse_site(url)
     for x in soup.find_all('a'):
         if "gallery_" in str(x):
-            gallery.append(x['href'])   
+            gallery.append(x['href'])
     gallery = list(dict.fromkeys(gallery))
     return gallery
 
-    
     # finds all image urls from the soup object and appends this to the img_list
 
 
 def get_images():
     global img_list
     img_list = []
-    #loops through the url list to get the imagelinks from the sites available e.g /gallery_520.html, /gallery_519.html
+    # loops through the url list to get the imagelinks from the sites available e.g /gallery_520.html, /gallery_519.html
     for url in get_imageUrl():
         site_url = "http://www.skogbergsantik.com" + url
         soup = parse_site(site_url)
@@ -47,14 +48,13 @@ def get_images():
             if "files/120x120" in image['src']:
                 trimmed_image = image['src'].replace('/120x120', '')
                 img_list.append("http://skogbergsantik.com/" + trimmed_image)
-    
-    
+
 
 # function to post all images to the GUI
 
 
 def publish_photos():
-    
+
     global row_number
     global column_number
     global all_labels
@@ -63,24 +63,24 @@ def publish_photos():
     column_number = 0
     all_labels = []
 
-    #creating multiple threads to download all the images and saves it to the array images
+    # creating multiple threads to download all the images and saves it to the array images
     pool = ThreadPool(8)
-    
+
     print("starting threading")
     images = pool.map(download_images, img_list)
     print(str(sys.getsizeof(images)))
     create_labels()
 
+
 def download_images(url):
     print("Working on item number: " + str(img_list.index(url)+1) +
-              "/" + str(len(img_list)), end="\r")
+          "/" + str(len(img_list)), end="\r")
     u = urllib.request.urlopen(url)
     raw_data = u.read()
     u.close()
     im = Image.open(BytesIO(raw_data))
     resized_image = im.resize((125, 125), Image.ANTIALIAS)
     return resized_image
-    
 
 
 # takes a Pil Image from images-array, then converts it to a photoimage and puts in on a label to present to the GUI
@@ -90,14 +90,15 @@ def create_labels():
     global row_number
     global column_number
     start = time.time()
-    
 
     iterate_images()
     end = time.time()
     print("")
-    print("This took " + str(round(end - start, 2)) + "s")   
+    print("This took " + str(round(end - start, 2)) + "s")
 
 # Gui stuff to create a canvas for the images.
+
+
 def iterate_images():
     global row_number
     global column_number
@@ -106,7 +107,7 @@ def iterate_images():
         label = tk.Label(image_frame, image=current_image)
         label.image = current_image
         label.grid(row=row_number, column=column_number)
-        
+
         # every 5th image we will increase the row and reset the column number to post 5 images on each row.
         if((images.index(image)) % 10 == 0):
             column_number = 0
@@ -115,17 +116,17 @@ def iterate_images():
             print("Drawing image : " + str(images.index(image)+1), end="\r")
         column_number += 1
 
+
 def run_script():
     start = time.time()
     global image_frame
     global column_number
     global row_number
-    
-    #fills the img_list with imgurls via get_images() and set basic variables
-    get_images()
-    
 
-    #creates a gui to present the pictures to
+    # fills the img_list with imgurls via get_images() and set basic variables
+    get_images()
+
+    # creates a gui to present the pictures to
     root = tk.Tk()
     root.title('Skogbergs Antik Pictionary ')
     root.geometry("1280x1024")
@@ -139,9 +140,8 @@ def run_script():
 
     # add scrollbar
     main_scrollbar = ttk.Scrollbar(
-    main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
-    main_scrollbar.pack(side=tk.RIGHT,fill=Y)
-   
+        main_frame, orient=tk.VERTICAL, command=main_canvas.yview)
+    main_scrollbar.pack(side=tk.RIGHT, fill=Y)
 
     # Configure canvas
     main_canvas.configure(yscrollcommand=main_scrollbar)
@@ -155,7 +155,8 @@ def run_script():
     end = time.time()
     print("")
     print("This took " + str(round(end - start, 2)) + "s")
-    
+
     root.mainloop()
+
 
 run_script()
