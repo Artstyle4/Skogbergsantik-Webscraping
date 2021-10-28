@@ -107,7 +107,7 @@ def iterate_images():
         label.image = current_image
         label.grid(row=row_number, column=column_number)
         
-        # every 5th image we will increase the row and reset the column number to post 5 images on each row
+        # every 5th image we will increase the row and reset the column number to post 5 images on each row.
         if((images.index(image)) % 10 == 0):
             column_number = 0
             row_number += 1
