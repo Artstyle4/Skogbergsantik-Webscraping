@@ -10,10 +10,12 @@ from io import BytesIO
 from tkinter import ttk
 import time
 from multiprocessing.dummy import Pool as ThreadPool
+import threading
 import sys
 
 # Create a beautiful soup object from the url www.skogbergantik.com
 
+start = time.time()
 
 def parse_site(url):
     page = requests.get(url)
@@ -66,14 +68,15 @@ def publish_photos():
     # creating multiple threads to download all the images and saves it to the array images
     pool = ThreadPool(8)
 
-    print("starting threading")
     images = pool.map(download_images, img_list)
-    print(str(sys.getsizeof(images)))
     create_labels()
+
+# need to add progress bar that works for multithreading
+# but this gives a general approximation on how much time its left.
 
 
 def download_images(url):
-    print("Working on item number: " + str(img_list.index(url)+1) +
+    print("Downloading images: " + str(img_list.index(url)+1) +
           "/" + str(len(img_list)), end="\r")
     u = urllib.request.urlopen(url)
     raw_data = u.read()
@@ -89,17 +92,15 @@ def create_labels():
     global image_frame
     global row_number
     global column_number
-    start = time.time()
 
     iterate_images()
-    end = time.time()
-    print("")
-    print("This took " + str(round(end - start, 2)) + "s")
+    
 
-# Gui stuff to create a canvas for the images.
+# GUI tools to create a canvas for the images.
 
 
 def iterate_images():
+    print("")
     global row_number
     global column_number
     for image in images:
@@ -112,13 +113,13 @@ def iterate_images():
         if((images.index(image)) % 10 == 0):
             column_number = 0
             row_number += 1
-            print("")
             print("Drawing image : " + str(images.index(image)+1), end="\r")
+
         column_number += 1
 
 
-def run_script():
-    start = time.time()
+def run_GUI():
+    
     global image_frame
     global column_number
     global row_number
@@ -152,11 +153,11 @@ def run_script():
     main_canvas.create_window((1, 1), window=image_frame, anchor="nw")
     publish_photos()
 
+    
     end = time.time()
     print("")
-    print("This took " + str(round(end - start, 2)) + "s")
-
+    print("Completed in: " + str(round(end - start, 2)) + "s")
     root.mainloop()
 
 
-run_script()
+run_GUI()
