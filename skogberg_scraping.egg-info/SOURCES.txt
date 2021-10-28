@@ -1,0 +1,6 @@
+setup.py
+skogberg_scraping.egg-info/PKG-INFO
+skogberg_scraping.egg-info/SOURCES.txt
+skogberg_scraping.egg-info/dependency_links.txt
+skogberg_scraping.egg-info/entry_points.txt
+skogberg_scraping.egg-info/top_level.txt

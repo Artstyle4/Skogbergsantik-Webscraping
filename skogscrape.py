@@ -18,7 +18,7 @@ def parse_site(url):
     soup = BeautifulSoup(page.content, "html.parser")
     return soup
 
-# finds the urls from the homepage for the image sub-pages and saves it to a list of subpages
+# finds the urls from the homepage for the image sub-pages and saves it to a list of subpages.
 
 
 def get_imageUrl():
